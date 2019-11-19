@@ -95,6 +95,9 @@ public class ClientOptions
     @Option(name = "--password", title = "password", description = "Prompt for password")
     public boolean password;
 
+    @Option(name = "--proxy-user", title = "proxy user", description = "Actual execution user; same as --user by default")
+    public String proxyUser;
+
     @Option(name = "--source", title = "source", description = "Name of source making query")
     public String source = "presto-cli";
 
@@ -170,7 +173,7 @@ public class ClientOptions
     {
         return new ClientSession(
                 parseServer(server),
-                user,
+                Optional.ofNullable(proxyUser).orElse(user),
                 source,
                 Optional.ofNullable(traceToken),
                 parseClientTags(clientTags),

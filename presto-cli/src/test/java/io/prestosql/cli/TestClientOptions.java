@@ -171,4 +171,23 @@ public class TestClientOptions
         ClientOptions options = console.clientOptions;
         options.toClientSession();
     }
+
+    @Test
+    public void testProxyUser()
+    {
+        ClientOptions options = new ClientOptions();
+        options.user = "auth_user";
+        options.proxyUser = "proxy_user";
+        ClientSession session = options.toClientSession();
+        assertEquals(session.getUser(), "proxy_user");
+    }
+
+    @Test
+    public void testDefaultProxyUser()
+    {
+        ClientOptions options = new ClientOptions();
+        options.user = "auth_user";
+        ClientSession session = options.toClientSession();
+        assertEquals(session.getUser(), "auth_user");
+    }
 }
