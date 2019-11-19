@@ -247,6 +247,27 @@ public class TestJdbcConnection
         assertEquals(listExtraCredentials(connection), credentials);
     }
 
+    @Test
+    public void testProxyUser()
+            throws SQLException
+    {
+        Connection connection = createConnection("auth_user", "proxyUser=proxy_user");
+        assertTrue(connection instanceof PrestoConnection);
+        PrestoConnection prestoConnection = connection.unwrap(PrestoConnection.class);
+        assertEquals(prestoConnection.getUser(), "auth_user");
+        assertEquals(prestoConnection.getProxyUser(), "proxy_user");
+    }
+
+    @Test
+    public void testDefaultProxyUser()
+            throws SQLException
+    {
+        Connection connection = createConnection("auth_user", "");
+        assertTrue(connection instanceof PrestoConnection);
+        PrestoConnection prestoConnection = connection.unwrap(PrestoConnection.class);
+        assertEquals(prestoConnection.getProxyUser(), "auth_user");
+    }
+
     private Connection createConnection()
             throws SQLException
     {
@@ -256,8 +277,14 @@ public class TestJdbcConnection
     private Connection createConnection(String extra)
             throws SQLException
     {
+        return createConnection("admin", extra);
+    }
+
+    private Connection createConnection(String user, String extra)
+            throws SQLException
+    {
         String url = format("jdbc:presto://%s/hive/default?%s", server.getAddress(), extra);
-        return DriverManager.getConnection(url, "admin", null);
+        return DriverManager.getConnection(url, user, null);
     }
 
     private static Set<String> listTables(Connection connection)

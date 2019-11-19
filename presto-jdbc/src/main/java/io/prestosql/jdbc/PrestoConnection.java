@@ -85,6 +85,7 @@ public class PrestoConnection
     private final URI jdbcUri;
     private final URI httpUri;
     private final String user;
+    private final String proxyUser;
     private final Map<String, String> extraCredentials;
     private final Optional<String> applicationNamePrefix;
     private final Map<String, String> clientInfo = new ConcurrentHashMap<>();
@@ -103,6 +104,7 @@ public class PrestoConnection
         this.schema.set(uri.getSchema());
         this.catalog.set(uri.getCatalog());
         this.user = uri.getUser();
+        this.proxyUser = uri.getProxyUser().orElse(user);
         this.applicationNamePrefix = uri.getApplicationNamePrefix();
         this.extraCredentials = uri.getExtraCredentials();
         this.queryExecutor = requireNonNull(queryExecutor, "queryExecutor is null");
@@ -617,6 +619,11 @@ public class PrestoConnection
         return user;
     }
 
+    String getProxyUser()
+    {
+        return proxyUser;
+    }
+
     @VisibleForTesting
     Map<String, String> getExtraCredentials()
     {
@@ -678,7 +685,7 @@ public class PrestoConnection
 
         ClientSession session = new ClientSession(
                 httpUri,
-                user,
+                proxyUser,
                 source,
                 traceToken,
                 ImmutableSet.copyOf(clientTags),

@@ -38,6 +38,7 @@ final class ConnectionProperties
 {
     public static final ConnectionProperty<String> USER = new User();
     public static final ConnectionProperty<String> PASSWORD = new Password();
+    public static final ConnectionProperty<String> PROXY_USER = new ProxyUser();
     public static final ConnectionProperty<HostAndPort> SOCKS_PROXY = new SocksProxy();
     public static final ConnectionProperty<HostAndPort> HTTP_PROXY = new HttpProxy();
     public static final ConnectionProperty<String> APPLICATION_NAME_PREFIX = new ApplicationNamePrefix();
@@ -59,6 +60,7 @@ final class ConnectionProperties
     private static final Set<ConnectionProperty<?>> ALL_PROPERTIES = ImmutableSet.<ConnectionProperty<?>>builder()
             .add(USER)
             .add(PASSWORD)
+            .add(PROXY_USER)
             .add(SOCKS_PROXY)
             .add(HTTP_PROXY)
             .add(APPLICATION_NAME_PREFIX)
@@ -123,6 +125,15 @@ final class ConnectionProperties
         public Password()
         {
             super("password", NOT_REQUIRED, ALLOWED, STRING_CONVERTER);
+        }
+    }
+
+    private static class ProxyUser
+            extends AbstractConnectionProperty<String>
+    {
+        public ProxyUser()
+        {
+            super("proxyUser", NOT_REQUIRED, ALLOWED, STRING_CONVERTER);
         }
     }
 

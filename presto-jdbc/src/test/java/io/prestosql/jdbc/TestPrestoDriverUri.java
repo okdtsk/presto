@@ -21,9 +21,11 @@ import java.util.Properties;
 
 import static io.prestosql.jdbc.ConnectionProperties.EXTRA_CREDENTIALS;
 import static io.prestosql.jdbc.ConnectionProperties.HTTP_PROXY;
+import static io.prestosql.jdbc.ConnectionProperties.PROXY_USER;
 import static io.prestosql.jdbc.ConnectionProperties.SOCKS_PROXY;
 import static io.prestosql.jdbc.ConnectionProperties.SSL_TRUST_STORE_PASSWORD;
 import static io.prestosql.jdbc.ConnectionProperties.SSL_TRUST_STORE_PATH;
+import static io.prestosql.jdbc.ConnectionProperties.USER;
 import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -117,6 +119,16 @@ public class TestPrestoDriverUri
             throws Exception
     {
         new PrestoDriverUri("jdbc:presto://localhost:8080?user=", new Properties());
+    }
+
+    @Test
+    public void testProxyUser()
+            throws Exception
+    {
+        PrestoDriverUri parameters = createDriverUri("presto://localhost:8080?proxyUser=proxy_user");
+        Properties properties = parameters.getProperties();
+        assertEquals(properties.getProperty(USER.getKey()), "test");
+        assertEquals(properties.getProperty(PROXY_USER.getKey()), "proxy_user");
     }
 
     @Test

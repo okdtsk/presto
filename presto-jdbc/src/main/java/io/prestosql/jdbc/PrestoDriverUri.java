@@ -52,6 +52,7 @@ import static io.prestosql.jdbc.ConnectionProperties.KERBEROS_REMOTE_SERVICE_NAM
 import static io.prestosql.jdbc.ConnectionProperties.KERBEROS_SERVICE_PRINCIPAL_PATTERN;
 import static io.prestosql.jdbc.ConnectionProperties.KERBEROS_USE_CANONICAL_HOSTNAME;
 import static io.prestosql.jdbc.ConnectionProperties.PASSWORD;
+import static io.prestosql.jdbc.ConnectionProperties.PROXY_USER;
 import static io.prestosql.jdbc.ConnectionProperties.SOCKS_PROXY;
 import static io.prestosql.jdbc.ConnectionProperties.SSL;
 import static io.prestosql.jdbc.ConnectionProperties.SSL_KEY_STORE_PASSWORD;
@@ -127,6 +128,12 @@ final class PrestoDriverUri
             throws SQLException
     {
         return USER.getRequiredValue(properties);
+    }
+
+    public Optional<String> getProxyUser()
+            throws SQLException
+    {
+        return PROXY_USER.getValue(properties);
     }
 
     public Optional<String> getApplicationNamePrefix()
