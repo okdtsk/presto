@@ -242,12 +242,11 @@ public class OrcPageSourceFactory
                 fileReadTypes.add(BIGINT);
             }
 
-            Map<String, OrcColumn> fileColumnsByName = ImmutableMap.of();
-            if (useOrcColumnNames || isFullAcid) {
-                verifyFileHasColumnNames(fileColumns, path);
-
-                // Convert column names read from ORC files to lower case to be consistent with those stored in Hive Metastore
-                fileColumnsByName = uniqueIndex(fileColumns, orcColumn -> orcColumn.getColumnName().toLowerCase(ENGLISH));
+            boolean hasOrcColumnNames = checkFileHasColumnNames(fileColumns);
+            if (isFullAcid && !hasOrcColumnNames) {
+                throw new PrestoException(
+                        HIVE_FILE_MISSING_COLUMN_NAMES,
+                        "ORC file does not contain column names in the footer: " + path);
             }
 
             TupleDomainOrcPredicateBuilder predicateBuilder = TupleDomainOrcPredicate.builder()
@@ -257,7 +256,9 @@ public class OrcPageSourceFactory
             List<ColumnAdaptation> columnAdaptations = new ArrayList<>(columns.size());
             for (HiveColumnHandle column : columns) {
                 OrcColumn orcColumn = null;
-                if (useOrcColumnNames || isFullAcid) {
+                if (hasOrcColumnNames) {
+                    // Convert column names read from ORC files to lower case to be consistent with those stored in Hive Metastore
+                    Map<String, OrcColumn> fileColumnsByName = uniqueIndex(fileColumns, orcColumn -> orcColumn.getColumnName().toLowerCase(ENGLISH));
                     orcColumn = fileColumnsByName.get(column.getName().toLowerCase(ENGLISH));
                 }
                 else if (column.getBaseHiveColumnIndex() < fileColumns.size()) {
@@ -331,13 +332,9 @@ public class OrcPageSourceFactory
         return format("Error opening Hive split %s (offset=%s, length=%s): %s", path, start, length, t.getMessage());
     }
 
-    private static void verifyFileHasColumnNames(List<OrcColumn> columns, Path path)
+    private static void checkFileHasColumnNames(List<OrcColumn> columns)
     {
-        if (!columns.isEmpty() && columns.stream().map(OrcColumn::getColumnName).allMatch(physicalColumnName -> DEFAULT_HIVE_COLUMN_NAME_PATTERN.matcher(physicalColumnName).matches())) {
-            throw new PrestoException(
-                    HIVE_FILE_MISSING_COLUMN_NAMES,
-                    "ORC file does not contain column names in the footer: " + path);
-        }
+        return !columns.isEmpty() && columns.stream().map(OrcColumn::getColumnName).allMatch(physicalColumnName -> DEFAULT_HIVE_COLUMN_NAME_PATTERN.matcher(physicalColumnName).matches());
     }
 
     static void verifyAcidSchema(OrcReader orcReader, Path path)
